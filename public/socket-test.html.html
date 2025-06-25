@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Connection Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0d101f;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #151d2e;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 184, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #FFB800;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #FFB800;
+            color: #0d101f;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background-color: #ffcc40;
+        }
+        button:disabled {
+            background-color: #7e5e00;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.5);
+        }
+        .error {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.5);
+        }
+        .info {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.5);
+        }
+        .logs {
+            background-color: #0a0f1d;
+            border-radius: 4px;
+            padding: 10px;
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .log-entry {
+            padding: 6px 10px;
+            border-radius: 2px;
+            margin-bottom: 6px;
+            font-family: monospace;
+            line-height: 1.4;
+        }
+        .timestamp {
+            color: #999;
+            margin-right: 5px;
+            font-size: 0.9em;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 184, 0, 0.2);
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab.active {
+            border-bottom: 3px solid #FFB800;
+            color: #FFB800;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Socket.IO Connection Test</h1>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="direct">Direct Connection</div>
+            <div class="tab" data-tab="proxy">Proxy Connection</div>
+        </div>
+        
+        <div class="tab-content active" id="direct-tab">
+            <p>Test connection directly to the Render backend.</p>
+            <div class="status info" id="direct-status">Disconnected</div>
+            <div class="controls">
+                <button id="direct-connect-btn">Connect Direct</button>
+                <button id="direct-disconnect-btn" disabled>Disconnect</button>
+                <button id="direct-check-btn">Check Status</button>
+            </div>
+            <div class="logs" id="direct-logs"></div>
+        </div>
+        
+        <div class="tab-content" id="proxy-tab">
+            <p>Test connection through Vercel proxy (use this on bloxroll.org).</p>
+            <div class="status info" id="proxy-status">Disconnected</div>
+            <div class="controls">
+                <button id="proxy-connect-btn">Connect via Proxy</button>
+                <button id="proxy-disconnect-btn" disabled>Disconnect</button>
+                <button id="proxy-check-btn">Check Status</button>
+            </div>
+            <div class="logs" id="proxy-logs"></div>
+        </div>
+    </div>
+    
+    <script>
+        // DOM Elements
+        const directTab = document.querySelector('[data-tab="direct"]');
+        const proxyTab = document.querySelector('[data-tab="proxy"]');
+        const directTabContent = document.getElementById('direct-tab');
+        const proxyTabContent = document.getElementById('proxy-tab');
+        
+        const directStatus = document.getElementById('direct-status');
+        const proxyStatus = document.getElementById('proxy-status');
+        
+        const directLogs = document.getElementById('direct-logs');
+        const proxyLogs = document.getElementById('proxy-logs');
+        
+        const directConnectBtn = document.getElementById('direct-connect-btn');
+        const directDisconnectBtn = document.getElementById('direct-disconnect-btn');
+        const directCheckBtn = document.getElementById('direct-check-btn');
+        
+        const proxyConnectBtn = document.getElementById('proxy-connect-btn');
+        const proxyDisconnectBtn = document.getElementById('proxy-disconnect-btn');
+        const proxyCheckBtn = document.getElementById('proxy-check-btn');
+        
+        // Socket instances
+        let directSocket = null;
+        let proxySocket = null;
+        
+        // Get the backend URL
+        const BACKEND_URL = 'https://bloxroll-development.onrender.com';
+        
+        // Tab switching
+        directTab.addEventListener('click', () => {
+            directTab.classList.add('active');
+            proxyTab.classList.remove('active');
+            directTabContent.classList.add('active');
+            proxyTabContent.classList.remove('active');
+        });
+        
+        proxyTab.addEventListener('click', () => {
+            proxyTab.classList.add('active');
+            directTab.classList.remove('active');
+            proxyTabContent.classList.add('active');
+            directTabContent.classList.remove('active');
+        });
+        
+        // Helper Functions
+        function addLog(container, message) {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            
+            const timestamp = document.createElement('span');
+            timestamp.className = 'timestamp';
+            timestamp.textContent = `[${new Date().toLocaleTimeString()}]`;
+            
+            logEntry.appendChild(timestamp);
+            logEntry.appendChild(document.createTextNode(message));
+            
+            container.appendChild(logEntry);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function updateStatus(element, message, type) {
+            element.textContent = message;
+            element.className = `status ${type}`;
+        }
+        
+        // Direct Connection
+        directConnectBtn.addEventListener('click', () => {
+            if (directSocket) {
+                addLog(directLogs, 'Socket already exists, disconnecting first...');
+                directSocket.disconnect();
+            }
+            
+            updateStatus(directStatus, 'Connecting...', 'info');
+            addLog(directLogs, `Attempting to connect to ${BACKEND_URL}`);
+            
+            try {
+                directSocket = io(BACKEND_URL, {
+                    path: '/socket.io',
+                    transports: ['websocket', 'polling'],
+                    reconnection: true,
+                    reconnectionAttempts: 5,
+                    reconnectionDelay: 1000,
+                    timeout: 10000
+                });
+                
+                // Socket event handlers
+                directSocket.on('connect', () => {
+                    addLog(directLogs, `Connected successfully! Socket ID: ${directSocket.id}`);
+                    updateStatus(directStatus, 'Connected', 'success');
+                    directConnectBtn.disabled = true;
+                    directDisconnectBtn.disabled = false;
+                });
+                
+                directSocket.on('disconnect', (reason) => {
+                    addLog(directLogs, `Disconnected: ${reason}`);
+                    updateStatus(directStatus, `Disconnected: ${reason}`, 'error');
+                    directConnectBtn.disabled = false;
+                    directDisconnectBtn.disabled = true;
+                });
+                
+                directSocket.on('connect_error', (error) => {
+                    addLog(directLogs, `Connection error: ${error.message}`);
+                    updateStatus(directStatus, `Connection Error: ${error.message}`, 'error');
+                });
+                
+                directSocket.on('error', (error) => {
+                    addLog(directLogs, `Socket error: ${error}`);
+                    updateStatus(directStatus, `Socket Error: ${error}`, 'error');
+                });
+                
+                // Event to show we're successfully receiving system events
+                directSocket.on('connect_timeout', (timeout) => {
+                    addLog(directLogs, `Connection timeout: ${timeout}ms`);
+                });
+                
+                directSocket.on('reconnect_attempt', (attemptNumber) => {
+                    addLog(directLogs, `Reconnection attempt #${attemptNumber}`);
+                });
+                
+                directSocket.on('reconnect_error', (error) => {
+                    addLog(directLogs, `Reconnection error: ${error.message}`);
+                });
+                
+                directSocket.on('reconnect_failed', () => {
+                    addLog(directLogs, 'Failed to reconnect');
+                });
+                
+                // Listen for any events from the server as a test
+                directSocket.onAny((event, ...args) => {
+                    addLog(directLogs, `Received event: ${event}`);
+                    console.log('Event received:', event, args);
+                });
+                
+            } catch (error) {
+                addLog(directLogs, `Error initializing socket: ${error.message}`);
+                updateStatus(directStatus, `Initialization Error: ${error.message}`, 'error');
+            }
+        });
+        
+        directDisconnectBtn.addEventListener('click', () => {
+            if (directSocket) {
+                directSocket.disconnect();
+                addLog(directLogs, 'Manually disconnected');
+                directDisconnectBtn.disabled = true;
+                directConnectBtn.disabled = false;
+            }
+        });
+        
+        directCheckBtn.addEventListener('click', () => {
+            if (!directSocket) {
+                addLog(directLogs, 'Socket not initialized');
+                updateStatus(directStatus, 'Socket not initialized', 'error');
+                return;
+            }
+            
+            const connected = directSocket.connected;
+            addLog(directLogs, `Connection status: ${connected ? 'Connected' : 'Disconnected'}`);
+            
+            if (connected) {
+                addLog(directLogs, `Socket ID: ${directSocket.id}`);
+                addLog(directLogs, `Transport: ${directSocket.io.engine.transport.name}`);
+                updateStatus(directStatus, 'Connected', 'success');
+            } else {
+                updateStatus(directStatus, 'Disconnected', 'error');
+            }
+        });
+        
+        // Proxy Connection
+        proxyConnectBtn.addEventListener('click', () => {
+            if (proxySocket) {
+                addLog(proxyLogs, 'Socket already exists, disconnecting first...');
+                proxySocket.disconnect();
+            }
+            
+            updateStatus(proxyStatus, 'Connecting...', 'info');
+            addLog(proxyLogs, `Attempting to connect via proxy to /`);
+            
+            try {
+                proxySocket = io('/', {
+                    path: '/socket.io',
+                    transports: ['websocket', 'polling'],
+                    reconnection: true,
+                    reconnectionAttempts: 5,
+                    reconnectionDelay: 1000,
+                    timeout: 10000
+                });
+                
+                // Socket event handlers
+                proxySocket.on('connect', () => {
+                    addLog(proxyLogs, `Connected successfully via proxy! Socket ID: ${proxySocket.id}`);
+                    updateStatus(proxyStatus, 'Connected', 'success');
+                    proxyConnectBtn.disabled = true;
+                    proxyDisconnectBtn.disabled = false;
+                });
+                
+                proxySocket.on('disconnect', (reason) => {
+                    addLog(proxyLogs, `Disconnected: ${reason}`);
+                    updateStatus(proxyStatus, `Disconnected: ${reason}`, 'error');
+                    proxyConnectBtn.disabled = false;
+                    proxyDisconnectBtn.disabled = true;
+                });
+                
+                proxySocket.on('connect_error', (error) => {
+                    addLog(proxyLogs, `Connection error: ${error.message}`);
+                    updateStatus(proxyStatus, `Connection Error: ${error.message}`, 'error');
+                });
+                
+                proxySocket.on('error', (error) => {
+                    addLog(proxyLogs, `Socket error: ${error}`);
+                    updateStatus(proxyStatus, `Socket Error: ${error}`, 'error');
+                });
+                
+                // Listen for any events from the server as a test
+                proxySocket.onAny((event, ...args) => {
+                    addLog(proxyLogs, `Received event: ${event}`);
+                    console.log('Event received:', event, args);
+                });
+                
+            } catch (error) {
+                addLog(proxyLogs, `Error initializing socket: ${error.message}`);
+                updateStatus(proxyStatus, `Initialization Error: ${error.message}`, 'error');
+            }
+        });
+        
+        proxyDisconnectBtn.addEventListener('click', () => {
+            if (proxySocket) {
+                proxySocket.disconnect();
+                addLog(proxyLogs, 'Manually disconnected');
+                proxyDisconnectBtn.disabled = true;
+                proxyConnectBtn.disabled = false;
+            }
+        });
+        
+        proxyCheckBtn.addEventListener('click', () => {
+            if (!proxySocket) {
+                addLog(proxyLogs, 'Socket not initialized');
+                updateStatus(proxyStatus, 'Socket not initialized', 'error');
+                return;
+            }
+            
+            const connected = proxySocket.connected;
+            addLog(proxyLogs, `Connection status: ${connected ? 'Connected' : 'Disconnected'}`);
+            
+            if (connected) {
+                addLog(proxyLogs, `Socket ID: ${proxySocket.id}`);
+                addLog(proxyLogs, `Transport: ${proxySocket.io.engine.transport.name}`);
+                updateStatus(proxyStatus, 'Connected', 'success');
+            } else {
+                updateStatus(proxyStatus, 'Disconnected', 'error');
+            }
+        });
+        
+        // Initialize logs
+        addLog(directLogs, 'Direct connection test initialized. Click "Connect Direct" to test connection directly to Render.');
+        addLog(proxyLogs, 'Proxy connection test initialized. Click "Connect via Proxy" to test connection through Vercel proxy.');
+    </script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+.chat-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.chat-input-container {
+  padding: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.chat-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Mobile specific styles */
+@media (max-width: 768px) {
+  .chat-container {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+}
+
+/* Keep only essential giveaway styles */
+
+.giveaway-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 184, 0, 0.2);
+  margin-bottom: 15px;
+}
+
+.giveaway-tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #8D98B3;
+  border-bottom: 2px solid transparent;
+}
+
+.giveaway-tab:hover {
+  color: #B8C3E6;
+}
+
+.giveaway-tab-active {
+  color: #FFB800;
+  border-bottom: 2px solid #FFB800;
+}
+
+.giveaway-item {
+  background: rgba(14, 17, 27, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.giveaway-countdown {
+  color: #00FF9D;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.giveaway-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chat-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(255, 184, 0, 0.15);
+  background: rgba(12, 14, 22, 0.95);
+  position: relative;
+}
+
+.chat-header-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(14, 17, 27, 0.95) 0%, rgba(16, 20, 31, 0.98) 100%);
+  z-index: -1;
+}
+
+.chat-title {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Chakra Petch', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.message-count {
+  background: #00FF9D;
+  color: #000;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  box-shadow: 0 0 5px rgba(0, 255, 157, 0.5);
+}
+
+.online-users {
+  display: flex;
+  align-items: center;
+  color: #00FF9D;
+  font-size: 11px;
+  gap: 4px;
+}
+
+.online-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00FF9D;
+  box-shadow: 0 0 5px #00FF9D;
+}
+
+.giveaway-container {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  gap: 8px;
+}
+
+.giveaway-count-badge {
+  background: #FFB800;
+  color: #000;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  border: 1px solid rgba(255, 184, 0, 0.5);
+  box-shadow: 0 0 5px rgba(255, 184, 0, 0.3);
+}
+
+.giveaway-button {
+  background: linear-gradient(135deg, #FFB800 0%, #FF9500 100%);
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Chakra Petch', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 5px rgba(255, 184, 0, 0.3);
+}
+
+.message-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.avatar-button {
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255, 184, 0, 0.5);
+}
+
+.avatar-hover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid transparent;
+  z-index: 2;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100% - 36px);
+}
+
+.username {
+  color: #FF4F4F;
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 2px;
+  font-family: 'Chakra Petch', sans-serif;
+}
+
+.message {
+  color: #fff;
+  font-size: 13px;
+  word-break: break-word;
+  line-height: 1.3;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 184, 0, 0.3) transparent;
+} 

@@ -1,0 +1,523 @@
+.coinflip-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(to right, #0d1524, #151d2e);
+  border-radius: 8px;
+  padding: 16px 20px;
+  height: 120px;
+  gap: 20px;
+  border: 1px solid rgba(255, 184, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+.coinflip-card:hover {
+  border-color: rgba(255, 184, 0, 0.25);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Remove winner/loser styles from main card */
+.coinflip-card.winner,
+.coinflip-card.loser {
+  border: 1px solid rgba(255, 184, 0, 0.15);
+  box-shadow: none;
+}
+
+/* Keep winner/loser styles for player elements */
+.player-side.winner .player-avatar {
+  border-color: #4caf50;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+
+.player-side.loser .player-avatar {
+  border-color: #f44336;
+  box-shadow: 0 0 10px rgba(244, 67, 54, 0.3);
+}
+
+.coinflip-card.joined,
+.coinflip-card.ended {
+  height: 72px;
+}
+
+.sides-container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-width: 200px;
+}
+
+.coinflip-card.joined .sides-container,
+.coinflip-card.ended .sides-container {
+  gap: 12px;
+  min-width: 120px;
+}
+
+.player-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.side-badge {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: -12px;
+  right: -12px;
+  z-index: 2;
+  transition: all 0.2s ease;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  border: none;
+}
+
+.coinflip-card.joined .side-badge {
+  width: 26px;
+  height: 26px;
+  top: -8px;
+  right: -8px;
+  padding: 0;
+}
+
+.side-badge.heads img {
+  filter: drop-shadow(0 0 6px rgba(76, 175, 80, 0.6));
+}
+
+.side-badge.tails img {
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.6));
+}
+
+.side-badge.heads:hover img {
+  filter: drop-shadow(0 0 10px rgba(76, 175, 80, 0.8));
+  transform: scale(1.15);
+}
+
+.side-badge.tails:hover img {
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+  transform: scale(1.15);
+}
+
+.side-badge-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.player-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 184, 0, 0.3);
+  background: #1a1f2c;
+  object-fit: cover;
+}
+
+.coinflip-card.joined .player-avatar {
+  width: 32px;
+  height: 32px;
+}
+
+.joiner-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #1a1f2c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(255, 184, 0, 0.3);
+}
+
+.coinflip-card.joined .joiner-placeholder {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+}
+
+.vs-text {
+  color: rgba(255, 184, 0, 0.7);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.coinflip-card.joined .vs-text {
+  font-size: 13px;
+}
+
+.items-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 12px;
+}
+
+.coinflip-card.joined .items-container {
+  gap: 6px;
+}
+
+.item-image {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  object-fit: contain;
+}
+
+.coinflip-card.joined .item-image {
+  width: 36px;
+  height: 36px;
+  padding: 2px;
+  object-fit: cover;
+}
+
+.remaining-items {
+  color: rgba(255, 184, 0, 0.9);
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(13, 21, 36, 0.6);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 184, 0, 0.15);
+}
+
+.coinflip-card.joined .remaining-items {
+  font-size: 12px;
+  padding: 2px 6px;
+}
+
+.remaining-items-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.value-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  min-width: 140px;
+}
+
+.game-value {
+  display: flex;
+  align-items: center;
+}
+
+.value-text {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+.coinflip-card.joined .value-text {
+  font-size: 16px;
+}
+
+.join-range {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(13, 17, 23, 0.8);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.actions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 100px;
+}
+
+.coinflip-card.joined .actions-container {
+  min-width: 80px;
+}
+
+.join-button, .view-button {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.coinflip-card.joined .view-button {
+  padding: 6px 16px;
+  height: 32px;
+  width: 80px;
+}
+
+.join-button {
+  background: linear-gradient(to bottom right, #FFD700, #FFA500);
+  color: #000;
+}
+
+.join-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 184, 0, 0.4);
+}
+
+.view-button {
+  background: rgba(13, 21, 36, 0.6);
+  color: rgba(255, 184, 0, 0.9);
+  border: 1px solid rgba(255, 184, 0, 0.15);
+}
+
+.view-button:hover {
+  background: rgba(255, 184, 0, 0.1);
+}
+
+.side-badge.winner img {
+  filter: drop-shadow(0 0 6px rgba(76, 175, 80, 0.6));
+}
+
+.side-badge.loser img {
+  filter: drop-shadow(0 0 6px rgba(244, 67, 54, 0.6));
+}
+
+.result-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+.result-circle-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.result-circle-image[src*="Heads"] {
+  filter: drop-shadow(0 0 8px rgba(76, 175, 80, 0.9));
+}
+
+.result-circle-image[src*="Tails"] {
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.9));
+}
+
+.coinflip-card.joined .result-circle {
+  width: 42px;
+  height: 42px;
+}
+
+.result-circle-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  width: 100px;
+  height: 100px;
+  position: relative;
+}
+
+/* Countdown Animation */
+.countdown-container {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.countdown-circle {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(13, 21, 36, 0.95);
+}
+
+.countdown-circle::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid #00ff9d;
+  clip-path: path('M32,32 L32,0 A32,32 0 1,1 31.9,0 z');
+  animation: countdown 3s linear forwards;
+  transform-origin: center;
+}
+
+.countdown-number {
+  color: #fff;
+  font-size: 32px;
+  font-weight: bold;
+  z-index: 2;
+}
+
+@keyframes countdown {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Updated Coin Animation */
+#coin {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-in;
+}
+
+#coin div {
+  width: 100%;
+  height: 100%;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  border-radius: 50%;
+  -webkit-box-shadow: inset 0 0 45px rgba(255,255,255,.3), 0 12px 20px -10px rgba(0,0,0,.4);
+  -moz-box-shadow: inset 0 0 45px rgba(255,255,255,.3), 0 12px 20px -10px rgba(0,0,0,.4);
+  box-shadow: inset 0 0 45px rgba(255,255,255,.3), 0 12px 20px -10px rgba(0,0,0,.4);
+  position: absolute;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.side-a {
+  background-image: url('https://i.postimg.cc/mPh4K77r/image.png');
+  background-size: cover;
+  background-position: center;
+  z-index: 100;
+}
+
+.side-b {
+  background-image: url('https://i.postimg.cc/JG6KYX1K/image.png');
+  background-size: cover;
+  background-position: center;
+  -webkit-transform: rotateY(-180deg);
+  transform: rotateY(-180deg);
+}
+
+#coin.heads {
+  -webkit-animation: flipHeads 3s ease-out forwards;
+  -moz-animation: flipHeads 3s ease-out forwards;
+  animation: flipHeads 3s ease-out forwards;
+}
+
+#coin.tails {
+  -webkit-animation: flipTails 3s ease-out forwards;
+  -moz-animation: flipTails 3s ease-out forwards;
+  animation: flipTails 3s ease-out forwards;
+}
+
+@-webkit-keyframes flipHeads {
+  from { -webkit-transform: rotateY(0); transform: rotateY(0); }
+  to { -webkit-transform: rotateY(1800deg); transform: rotateY(1800deg); }
+}
+
+@-webkit-keyframes flipTails {
+  from { -webkit-transform: rotateY(0); transform: rotateY(0); }
+  to { -webkit-transform: rotateY(1980deg); transform: rotateY(1980deg); }
+}
+
+@keyframes flipHeads {
+  from { -webkit-transform: rotateY(0); transform: rotateY(0); }
+  to { -webkit-transform: rotateY(1800deg); transform: rotateY(1800deg); }
+}
+
+@keyframes flipTails {
+  from { -webkit-transform: rotateY(0); transform: rotateY(0); }
+  to { -webkit-transform: rotateY(1980deg); transform: rotateY(1980deg); }
+}
+
+@media (max-width: 768px) {
+  .coinflip-card {
+    padding: 16px 12px;
+    gap: 8px;
+  }
+
+  .sides-container {
+    gap: 12px;
+    min-width: 140px;
+  }
+
+  .items-container {
+    gap: 6px;
+    margin: 0 8px;
+    flex-shrink: 0;
+  }
+
+  .item-image {
+    width: 36px;
+    height: 36px;
+  }
+
+  .remaining-items-circle {
+    width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
+
+  .value-container {
+    min-width: 110px;
+    margin-right: 4px;
+  }
+
+  .value-text {
+    font-size: 18px;
+  }
+
+  .join-range {
+    font-size: 12px;
+    padding: 3px 6px;
+  }
+
+  .actions-container {
+    min-width: 80px;
+    gap: 6px;
+  }
+
+  .join-button, .view-button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .vs-text {
+    font-size: 13px;
+  }
+
+  .player-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .side-badge {
+    width: 32px;
+    height: 32px;
+    top: -10px;
+    right: -10px;
+  }
+} 

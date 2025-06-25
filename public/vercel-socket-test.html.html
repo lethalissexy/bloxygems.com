@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vercel Socket.IO Proxy Test</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0d101f;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #151d2e;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 184, 0, 0.2);
+    }
+    h1 {
+      text-align: center;
+      color: #FFB800;
+      margin-bottom: 20px;
+    }
+    .connection-info {
+      background-color: #1e293b;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+    .connection-status {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 10px;
+      border-radius: 4px;
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .connected {
+      background-color: #00c853;
+    }
+    .disconnected {
+      background-color: #ff3d00;
+    }
+    .connecting {
+      background-color: #ffab00;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+    .log-container {
+      background-color: #0a0f1d;
+      border-radius: 4px;
+      padding: 10px;
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 20px;
+      font-family: monospace;
+    }
+    .log-entry {
+      margin-bottom: 8px;
+      padding: 5px;
+      border-radius: 2px;
+    }
+    .log-entry.info {
+      border-left: 3px solid #2196f3;
+      background-color: rgba(33, 150, 243, 0.1);
+    }
+    .log-entry.error {
+      border-left: 3px solid #f44336;
+      background-color: rgba(244, 67, 54, 0.1);
+    }
+    .log-entry.success {
+      border-left: 3px solid #4caf50;
+      background-color: rgba(76, 175, 80, 0.1);
+    }
+    .btn {
+      background-color: #FFB800;
+      color: #0d101f;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .btn:hover {
+      background-color: #ffcc40;
+    }
+    .btn:disabled {
+      background-color: #7e5e00;
+      cursor: not-allowed;
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Vercel Socket.IO Proxy Test</h1>
+    
+    <div class="connection-info">
+      Host: <span id="host"></span><br>
+      Socket Path: <span id="socket-path">/socket.io</span><br>
+      Transport: <span id="transport">auto</span>
+    </div>
+    
+    <div class="connection-status">
+      <div class="status-indicator disconnected" id="status-indicator"></div>
+      <span id="connection-status">Disconnected</span>
+    </div>
+    
+    <div class="btn-group">
+      <button class="btn" id="connect-direct-btn">Connect Direct</button>
+      <button class="btn" id="connect-proxy-btn">Connect via Proxy</button>
+      <button class="btn" id="disconnect-btn" disabled>Disconnect</button>
+      <button class="btn" id="clear-log-btn">Clear Log</button>
+    </div>
+    
+    <div class="log-container" id="log-container"></div>
+  </div>
+
+  <script>
+    // Elements
+    const statusIndicator = document.getElementById('status-indicator');
+    const connectionStatus = document.getElementById('connection-status');
+    const hostInfo = document.getElementById('host');
+    const socketPathInfo = document.getElementById('socket-path');
+    const transportInfo = document.getElementById('transport');
+    const connectDirectBtn = document.getElementById('connect-direct-btn');
+    const connectProxyBtn = document.getElementById('connect-proxy-btn');
+    const disconnectBtn = document.getElementById('disconnect-btn');
+    const clearLogBtn = document.getElementById('clear-log-btn');
+    const logContainer = document.getElementById('log-container');
+    
+    // Set host info
+    hostInfo.textContent = window.location.host;
+    
+    // Socket instance
+    let socket = null;
+    
+    // Helper functions
+    function addLogEntry(message, type = 'info') {
+      const logEntry = document.createElement('div');
+      logEntry.classList.add('log-entry', type);
+      
+      const timestamp = document.createElement('span');
+      timestamp.style.color = '#666';
+      timestamp.style.marginRight = '8px';
+      timestamp.textContent = new Date().toLocaleTimeString();
+      
+      logEntry.appendChild(timestamp);
+      logEntry.appendChild(document.createTextNode(message));
+      
+      logContainer.appendChild(logEntry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+    
+    function updateConnectionStatus(status) {
+      statusIndicator.className = 'status-indicator ' + status;
+      
+      switch(status) {
+        case 'connected':
+          connectionStatus.textContent = 'Connected';
+          connectDirectBtn.disabled = true;
+          connectProxyBtn.disabled = true;
+          disconnectBtn.disabled = false;
+          break;
+        case 'disconnected':
+          connectionStatus.textContent = 'Disconnected';
+          connectDirectBtn.disabled = false;
+          connectProxyBtn.disabled = false;
+          disconnectBtn.disabled = true;
+          break;
+        case 'connecting':
+          connectionStatus.textContent = 'Connecting...';
+          connectDirectBtn.disabled = true;
+          connectProxyBtn.disabled = true;
+          disconnectBtn.disabled = true;
+          break;
+      }
+    }
+    
+    // Button event listeners
+    connectDirectBtn.addEventListener('click', () => {
+      updateConnectionStatus('connecting');
+      
+      const directUrl = 'https://bloxroll-development.onrender.com';
+      addLogEntry(`Connecting directly to ${directUrl}`);
+      socketPathInfo.textContent = '/socket.io';
+      transportInfo.textContent = 'websocket, polling';
+      
+      // Initialize socket with direct connection
+      socket = io(directUrl, {
+        path: '/socket.io',
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        timeout: 10000
+      });
+      
+      setupSocketListeners(socket, 'direct');
+    });
+    
+    connectProxyBtn.addEventListener('click', () => {
+      updateConnectionStatus('connecting');
+      
+      const proxyUrl = '/';
+      addLogEntry(`Connecting via Vercel proxy at ${proxyUrl}`);
+      socketPathInfo.textContent = '/socket.io';
+      transportInfo.textContent = 'websocket, polling';
+      
+      // Initialize socket with proxy
+      socket = io(proxyUrl, {
+        path: '/socket.io',
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        timeout: 10000
+      });
+      
+      setupSocketListeners(socket, 'proxy');
+    });
+    
+    function setupSocketListeners(socket, mode) {
+      // Socket event listeners
+      socket.on('connect', () => {
+        updateConnectionStatus('connected');
+        addLogEntry(`Socket connected successfully via ${mode}! Socket ID: ${socket.id}`, 'success');
+        addLogEntry(`Transport used: ${socket.io.engine.transport.name}`);
+        transportInfo.textContent = socket.io.engine.transport.name;
+      });
+      
+      socket.on('connect_error', (error) => {
+        updateConnectionStatus('disconnected');
+        addLogEntry(`Connection error (${mode}): ${error.message}`, 'error');
+      });
+      
+      socket.on('disconnect', (reason) => {
+        updateConnectionStatus('disconnected');
+        addLogEntry(`Socket disconnected (${mode}): ${reason}`, 'error');
+      });
+      
+      socket.on('error', (error) => {
+        addLogEntry(`Socket error (${mode}): ${error}`, 'error');
+      });
+      
+      // Listen for any events to track activity
+      socket.onAny((event, ...args) => {
+        addLogEntry(`Received event: ${event}`, 'info');
+        console.log('Event received:', event, args);
+      });
+    }
+    
+    disconnectBtn.addEventListener('click', () => {
+      if (socket) {
+        socket.disconnect();
+        addLogEntry('Socket disconnected manually');
+      }
+    });
+    
+    clearLogBtn.addEventListener('click', () => {
+      logContainer.innerHTML = '';
+      addLogEntry('Log cleared');
+    });
+    
+    // Initial log
+    addLogEntry('Socket.IO test page loaded. This page tests both direct connections and proxy connections through Vercel.');
+    addLogEntry('Click "Connect via Proxy" to test the Vercel proxy route (should work on bloxroll.org)');
+    addLogEntry('Click "Connect Direct" to test direct connection to Render (may fail due to CORS)');
+  </script>
+</body>
+</html>

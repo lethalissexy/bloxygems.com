@@ -1,0 +1,51 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Chakra Petch', sans-serif;
+}
+
+body {
+  background-color: #0D101F;
+  color: #fff;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(13, 16, 31, 0.95);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 184, 0, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 184, 0, 0.5);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 184, 0, 0.3) rgba(13, 16, 31, 0.95);
+}
+
+#root {
+  min-height: 100vh;
+  background: #0B0E13;
+}
+
+@keyframes flash-stats {
+  0% { box-shadow: 0 0 0 rgba(255, 184, 0, 0); }
+  50% { box-shadow: 0 0 10px 4px rgba(255, 184, 0, 0.7); }
+  100% { box-shadow: 0 0 0 rgba(255, 184, 0, 0); }
+}
+
+.flash-update {
+  animation: flash-stats 1s ease-out;
+}

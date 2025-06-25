@@ -1,0 +1,33 @@
+/* CSS Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  font-family: 'Chakra Petch', sans-serif;
+  background-color: #070912;
+  color: #fff;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+button {
+  font-family: 'Chakra Petch', sans-serif;
+  cursor: pointer;
+}
+
+input, button {
+  outline: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+} 
